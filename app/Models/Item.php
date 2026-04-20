@@ -12,6 +12,7 @@ class Item extends Model
 
     protected $fillable = [
         'category_id',
+        'location_id',
         'sku',
         'name',
         'description',
@@ -35,5 +36,13 @@ class Item extends Model
     public function category(): BelongsTo
     {
         return $this->belongsTo(Category::class);
+    }
+
+    /**
+     * Get the location where the item is stored.
+     */
+    public function location(): BelongsTo
+    {
+        return $this->belongsTo(Location::class);
     }
 }

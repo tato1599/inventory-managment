@@ -1,7 +1,7 @@
-import Alpine from 'alpinejs'
+import { Livewire, Alpine } from '../../vendor/livewire/livewire/dist/livewire.esm';
 import persist from '@alpinejs/persist'
 
 Alpine.plugin(persist)
 window.Alpine = Alpine
 
-Alpine.start()
+Livewire.start()

@@ -21,17 +21,6 @@ export default {
                 body: ['Inter', ...defaultTheme.fontFamily.sans],
                 label: ['Inter', ...defaultTheme.fontFamily.sans],
             },
-            colors: {
-                "primary": "#4f46e5", // Indigo 600
-                "secondary": "#0ea5e9", // Blue 500
-                "accent": "#f59e0b", // Amber 500
-                "neutral": "#1e293b", // Slate 800
-                "base-100": "#ffffff",
-                "info": "#06b6d4",
-                "success": "#10b981",
-                "warning": "#f59e0b",
-                "error": "#ef4444",
-            },
             borderRadius: {
                 "DEFAULT": "0.5rem",
                 "lg": "0.75rem",
@@ -52,10 +41,13 @@ export default {
                     "base-100": "#ffffff",
                     "base-200": "#f8fafc",
                     "base-300": "#f1f5f9",
+                    "base-content": "#1e293b",
                     "info": "#06b6d4",
                     "success": "#10b981",
                     "warning": "#f59e0b",
                     "error": "#ef4444",
+                    "--rounded-box": "1rem",
+                    "--rounded-btn": "0.75rem",
                 },
                 dark: {
                     "primary": "#6366f1",
@@ -65,10 +57,13 @@ export default {
                     "base-100": "#0f172a",
                     "base-200": "#1e293b",
                     "base-300": "#334155",
+                    "base-content": "#f1f5f9",
                     "info": "#06b6d4",
                     "success": "#10b981",
                     "warning": "#f59e0b",
                     "error": "#ef4444",
+                    "--rounded-box": "1rem",
+                    "--rounded-btn": "0.75rem",
                 },
             },
         ],
