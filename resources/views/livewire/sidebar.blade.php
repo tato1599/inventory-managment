@@ -14,12 +14,12 @@
         </div>
 
         <nav class="space-y-1">
-            <a class="flex items-center space-x-3 px-3 py-2.5 bg-indigo-50 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300 font-bold rounded-xl active:scale-95 transition-all duration-200" href="{{ route('dashboard') }}">
+            <a class="flex items-center space-x-3 px-3 py-2.5 {{ request()->routeIs('dashboard') ? 'bg-indigo-50 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300 font-bold' : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800' }} rounded-xl transition-all duration-200" href="{{ route('dashboard') }}">
                 <span class="material-symbols-outlined text-lg">dashboard</span>
                 <span>Tablero</span>
             </a>
             
-            <a class="flex items-center space-x-3 px-3 py-2.5 text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-indigo-600 dark:hover:text-indigo-400 rounded-xl transition-all duration-200" href="#">
+            <a class="flex items-center space-x-3 px-3 py-2.5 {{ request()->routeIs('inventory.index') ? 'bg-indigo-50 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300 font-bold' : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800' }} rounded-xl transition-all duration-200" href="{{ route('inventory.index') }}">
                 <span class="material-symbols-outlined text-lg">inventory_2</span>
                 <span>Inventario</span>
             </a>

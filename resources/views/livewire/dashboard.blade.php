@@ -5,8 +5,8 @@
             <div class="md:col-span-2 bg-indigo-600 dark:bg-indigo-700 p-8 rounded-2xl relative overflow-hidden group shadow-2xl shadow-indigo-500/20">
                 <div class="relative z-10">
                     <p class="text-indigo-100 font-medium opacity-80 uppercase tracking-widest text-[10px]">Vista General de la Colección</p>
-                    <h2 class="text-white text-5xl font-headline font-black mt-2 tracking-tighter">12,842</h2>
-                    <p class="text-indigo-100 mt-4 text-sm max-w-xs leading-relaxed">Artículos catalogados en 14 departamentos. La última auditoría muestra un 99.4% de integridad de datos.</p>
+                    <h2 class="text-white text-5xl font-headline font-black mt-2 tracking-tighter">{{ number_format($stats['total_items']) }}</h2>
+                    <p class="text-indigo-100 mt-4 text-sm max-w-xs leading-relaxed">Artículos catalogados en {{ $stats['categories_count'] }} departamentos. Datos sincronizados en tiempo real.</p>
                 </div>
                 <div class="absolute right-0 top-0 h-full w-1/3 bg-gradient-to-l from-white/10 to-transparent flex items-center justify-center group-hover:scale-110 transition-transform duration-700">
                     <span class="material-symbols-outlined text-[120px] text-white opacity-10">inventory_2</span>
@@ -16,22 +16,22 @@
             <div class="bg-white dark:bg-slate-900 p-8 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-800 flex flex-col justify-between hover:shadow-xl transition-all border-b-4 border-b-blue-500">
                 <div>
                     <p class="text-slate-500 dark:text-slate-400 font-bold text-[10px] uppercase tracking-widest">Préstamos Activos</p>
-                    <h2 class="text-slate-900 dark:text-slate-50 text-4xl font-headline font-black mt-2">1,204</h2>
+                    <h2 class="text-slate-900 dark:text-slate-50 text-4xl font-headline font-black mt-2">{{ number_format($stats['loaned_items']) }}</h2>
                 </div>
                 <div class="flex items-center text-blue-600 dark:text-blue-400 text-sm font-bold mt-6">
                     <span class="material-symbols-outlined text-sm mr-2">trending_up</span>
-                    <span>12% más que el mes pasado</span>
+                    <span>Seguimiento de préstamos activado</span>
                 </div>
             </div>
             
             <div class="bg-white dark:bg-slate-900 p-8 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-800 flex flex-col justify-between hover:shadow-xl transition-all border-b-4 border-b-amber-500">
                 <div>
-                    <p class="text-slate-500 dark:text-slate-400 font-bold text-[10px] uppercase tracking-widest">Devoluciones Pendientes</p>
-                    <h2 class="text-slate-900 dark:text-slate-50 text-4xl font-headline font-black mt-2">48</h2>
+                    <p class="text-slate-500 dark:text-slate-400 font-bold text-[10px] uppercase tracking-widest">En Mantenimiento</p>
+                    <h2 class="text-slate-900 dark:text-slate-50 text-4xl font-headline font-black mt-2">{{ number_format($stats['maintenance_items']) }}</h2>
                 </div>
                 <div class="flex items-center text-amber-600 dark:text-amber-400 text-sm font-bold mt-6">
                     <span class="material-symbols-outlined text-sm mr-2">warning</span>
-                    <span>8 artículos retrasados</span>
+                    <span>Artículos fuera de servicio</span>
                 </div>
             </div>
         </section>
@@ -46,31 +46,24 @@
                 </div>
                 
                 <div class="space-y-4">
-                    <div class="flex items-start p-6 bg-white dark:bg-slate-900 rounded-2xl border border-slate-100 dark:border-slate-800 group hover:border-indigo-500 dark:hover:border-indigo-500 transition-all duration-300 shadow-sm hover:shadow-lg">
-                        <div class="w-12 h-12 rounded-xl bg-blue-50 dark:bg-blue-900/30 flex items-center justify-center shrink-0">
-                            <span class="material-symbols-outlined text-blue-600 dark:text-blue-400">outbound</span>
-                        </div>
-                        <div class="ml-6 flex-1">
-                            <div class="flex justify-between items-center">
-                                <h4 class="font-bold text-slate-900 dark:text-slate-100">Préstamo Procesado: Item #SKU-293</h4>
-                                <span class="text-[10px] text-slate-400 font-bold uppercase">Hace 2 min</span>
+                    @forelse($recentItems as $item)
+                        <div class="flex items-start p-6 bg-white dark:bg-slate-900 rounded-2xl border border-slate-100 dark:border-slate-800 group hover:border-indigo-500 dark:hover:border-indigo-500 transition-all duration-300 shadow-sm hover:shadow-lg">
+                            <div class="w-12 h-12 rounded-xl bg-blue-50 dark:bg-blue-900/30 flex items-center justify-center shrink-0">
+                                <span class="material-symbols-outlined text-blue-600 dark:text-blue-400">inventory</span>
                             </div>
-                            <p class="text-sm text-slate-500 dark:text-slate-400 mt-2 leading-relaxed">Modelo anatómico de alta fidelidad prestado al Depto. de Biología.</p>
-                        </div>
-                    </div>
-                    
-                    <div class="flex items-start p-6 bg-white dark:bg-slate-900 rounded-2xl border border-slate-100 dark:border-slate-800 group hover:border-indigo-500 dark:hover:border-indigo-500 transition-all duration-300 shadow-sm hover:shadow-lg">
-                        <div class="w-12 h-12 rounded-xl bg-emerald-50 dark:bg-emerald-900/30 flex items-center justify-center shrink-0">
-                            <span class="material-symbols-outlined text-emerald-600 dark:text-emerald-400">keyboard_return</span>
-                        </div>
-                        <div class="ml-6 flex-1">
-                            <div class="flex justify-between items-center">
-                                <h4 class="font-bold text-slate-900 dark:text-slate-100">Devolución Registrada: Archivos-04</h4>
-                                <span class="text-[10px] text-slate-400 font-bold uppercase">Hace 15 min</span>
+                            <div class="ml-6 flex-1">
+                                <div class="flex justify-between items-center">
+                                    <h4 class="font-bold text-slate-900 dark:text-slate-100">{{ $item->name }}</h4>
+                                    <span class="text-[10px] text-slate-400 font-bold uppercase">{{ $item->sku }}</span>
+                                </div>
+                                <p class="text-sm text-slate-500 dark:text-slate-400 mt-2 leading-relaxed truncate">{{ $item->description }}</p>
                             </div>
-                            <p class="text-sm text-slate-500 dark:text-slate-400 mt-2 leading-relaxed">Colección de mapas victorianos devuelta por el Depto. de Historia.</p>
                         </div>
-                    </div>
+                    @empty
+                        <div class="text-center py-12 bg-white dark:bg-slate-900 rounded-2xl border border-dashed border-slate-200 dark:border-slate-800">
+                            <p class="text-slate-400 text-sm">No hay actividad reciente.</p>
+                        </div>
+                    @endforelse
                 </div>
 
                 <!-- Visual Chart Area -->

@@ -19,6 +19,8 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        //
+        // Add manual registration for MaryUI components if prefix issues persist
+        \Illuminate\Support\Facades\Blade::component('mary-select', \Mary\View\Components\Select::class);
+        \Illuminate\Support\Facades\Blade::component('select', \Mary\View\Components\Select::class);
     }
 }

@@ -12,4 +12,5 @@ Route::middleware([
     'verified',
 ])->group(function () {
     Route::get('/dashboard', \App\Livewire\Dashboard::class)->name('dashboard');
+    Route::get('/inventory', \App\Livewire\Inventory\Index::class)->name('inventory.index');
 });
