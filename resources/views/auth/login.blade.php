@@ -1,32 +1,32 @@
 <x-guest-layout>
-    <div class="min-h-screen bg-gradient-to-br from-indigo-900 via-slate-900 to-black flex flex-col items-center justify-center p-6 sm:p-12">
+    <div class="min-h-screen bg-slate-50 dark:bg-slate-950 flex flex-col items-center justify-center p-6 sm:p-12 transition-colors duration-300">
         <div class="w-full max-w-lg">
             <div class="text-center mb-10 space-y-4 animate-in fade-in zoom-in duration-700">
-                <div class="bg-white/10 p-4 rounded-2xl inline-block backdrop-blur-xl border border-white/20 shadow-2xl">
-                    <x-mary-icon name="o-cube" class="w-12 h-12 text-indigo-400" />
+                <div class="bg-indigo-600 p-4 rounded-3xl inline-block shadow-2xl shadow-indigo-500/40">
+                    <x-mary-icon name="o-cube" class="w-12 h-12 text-white" />
                 </div>
                 <div class="space-y-1">
-                    <h1 class="text-4xl font-extrabold text-white tracking-tight">NCIE Inventory</h1>
-                    <p class="text-slate-400 text-lg">Soluciones de control inteligente</p>
+                    <h1 class="text-4xl font-extrabold text-slate-900 dark:text-white tracking-tight font-headline">NCIE Inventory</h1>
+                    <p class="text-slate-500 dark:text-slate-400 text-lg">Soluciones de control inteligente</p>
                 </div>
             </div>
 
-            <x-mary-card class="bg-slate-900/50 backdrop-blur-3xl border-slate-700 shadow-2xl !p-2">
-                <div class="p-6 space-y-6">
-                    <div class="space-y-2">
-                        <h2 class="text-2xl font-bold text-white">Bienvenido</h2>
-                        <p class="text-slate-400">Ingresa tus credenciales para continuar</p>
+            <x-mary-card shadow class="bg-white dark:bg-slate-900 border-none !p-2 rounded-3xl">
+                <div class="p-8 space-y-8">
+                    <div class="space-y-2 text-center sm:text-left">
+                        <h2 class="text-3xl font-black text-slate-900 dark:text-white font-headline">Bienvenido</h2>
+                        <p class="text-slate-500 dark:text-slate-400">Ingresa tus credenciales para continuar</p>
                     </div>
 
                     <x-mary-errors class="mb-4" />
 
                     @session('status')
-                        <div class="mb-4 font-medium text-sm text-green-400 bg-green-400/10 p-3 rounded-lg border border-green-400/20">
+                        <div class="mb-4 font-medium text-sm text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-900/20 p-4 rounded-2xl border border-emerald-100 dark:border-emerald-800/50">
                             {{ $value }}
                         </div>
                     @endsession
 
-                    <form method="POST" action="{{ route('login') }}" class="space-y-5">
+                    <form method="POST" action="{{ route('login') }}" class="space-y-6">
                         @csrf
 
                         <x-mary-input
@@ -37,7 +37,7 @@
                             value="{{ old('email') }}"
                             required
                             autofocus
-                            class="input-bordered border-slate-700 bg-slate-800/50 text-white focus:border-indigo-500"
+                            class="input-bordered border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/50 text-slate-900 dark:text-white focus:border-indigo-500 rounded-2xl h-14"
                         />
 
                         <x-mary-input
@@ -46,24 +46,24 @@
                             icon="o-key"
                             type="password"
                             required
-                            class="input-bordered border-slate-700 bg-slate-800/50 text-white focus:border-indigo-500"
+                            class="input-bordered border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/50 text-slate-900 dark:text-white focus:border-indigo-500 rounded-2xl h-14"
                         />
 
-                        <div class="flex items-center justify-between text-sm">
-                            <x-mary-checkbox id="remember_me" name="remember" label="Mantener sesión" class="checkbox-primary" />
+                        <div class="flex items-center justify-between text-sm pt-2">
+                            <x-mary-checkbox id="remember_me" name="remember" label="Mantener sesión iniciada" class="checkbox-primary rounded-lg" />
 
                             @if (Route::has('password.request'))
-                                <a class="text-indigo-400 hover:text-indigo-300 transition-colors font-medium" href="{{ route('password.request') }}">
+                                <a class="text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300 transition-colors font-bold underline underline-offset-4" href="{{ route('password.request') }}">
                                     ¿Olvidaste tu contraseña?
                                 </a>
                             @endif
                         </div>
 
-                        <div class="pt-2">
+                        <div class="pt-4">
                             <x-mary-button 
-                                label="Iniciar Sesión" 
+                                label="Iniciar Sesión Ahora" 
                                 type="submit" 
-                                class="btn-primary w-full py-6 text-lg font-bold shadow-lg shadow-indigo-500/20" 
+                                class="btn-primary w-full h-14 text-lg font-black shadow-xl shadow-indigo-500/30 rounded-2xl uppercase tracking-widest" 
                                 spinner 
                             />
                         </div>
@@ -71,7 +71,7 @@
                 </div>
             </x-mary-card>
 
-            <p class="text-center mt-8 text-slate-500 text-sm">
+            <p class="text-center mt-10 text-slate-400 dark:text-slate-500 text-xs font-bold uppercase tracking-widest">
                 &copy; {{ date('Y') }} NCIE Inventory. Todos los derechos reservados.
             </p>
         </div>
