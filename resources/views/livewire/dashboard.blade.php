@@ -2,7 +2,6 @@
     {{-- HEADER --}}
     <x-mary-header title="Tablero de Control" subtitle="Resumen ejecutivo del estado del hardware en el Nodo NCIE" separator progress-indicator>
         <x-slot:actions>
-            <x-mary-button icon="o-plus" label="Registro Rápido" class="btn-primary" link="{{ route('inventory.index') }}" />
         </x-slot:actions>
     </x-mary-header>
 
@@ -82,12 +81,12 @@
             {{-- ALERTS & SHORTCUTS --}}
             <aside class="lg:col-span-4 space-y-6">
                 <!-- Operational Shortcuts -->
-                <x-mary-card title="Herramientas Rápidas" shadow class="bg-neutral text-neutral-content rounded-3xl">
+                <x-mary-card title="Herramientas Rápidas" shadow class="bg-gradient-to-br from-primary to-secondary text-white rounded-3xl border-none">
                     <div class="grid grid-cols-2 gap-3 mt-4">
-                        <x-mary-button icon="o-qr-code" label="Escanear" class="btn-ghost bg-white/5 hover:bg-white/10 flex-col h-auto py-5 gap-2 border-none rounded-2xl text-[10px]" />
-                        <x-mary-button icon="o-printer" label="Tickets" class="btn-ghost bg-white/5 hover:bg-white/10 flex-col h-auto py-5 gap-2 border-none rounded-2xl text-[10px]" />
-                        <x-mary-button icon="o-check-badge" label="Auditar" class="btn-ghost bg-white/5 hover:bg-white/10 flex-col h-auto py-5 gap-2 border-none rounded-2xl text-[10px]" />
-                        <x-mary-button icon="o-document-chart-bar" label="Reportes" class="btn-ghost bg-white/5 hover:bg-white/10 flex-col h-auto py-5 gap-2 border-none rounded-2xl text-[10px]" />
+                        <x-mary-button icon="o-qr-code" label="Escanear" class="btn-ghost bg-white/10 hover:bg-white/20 flex-col h-auto py-5 gap-2 border-none rounded-2xl text-[10px] text-white" />
+                        <x-mary-button icon="o-printer" label="Tickets" class="btn-ghost bg-white/10 hover:bg-white/20 flex-col h-auto py-5 gap-2 border-none rounded-2xl text-[10px] text-white" />
+                        <x-mary-button icon="o-check-badge" label="Auditar" class="btn-ghost bg-white/10 hover:bg-white/20 flex-col h-auto py-5 gap-2 border-none rounded-2xl text-[10px] text-white" />
+                        <x-mary-button icon="o-document-chart-bar" label="Reportes" class="btn-ghost bg-white/10 hover:bg-white/20 flex-col h-auto py-5 gap-2 border-none rounded-2xl text-[10px] text-white" />
                     </div>
                 </x-mary-card>
 
