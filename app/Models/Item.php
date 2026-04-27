@@ -16,7 +16,11 @@ class Item extends Model
         'sku',
         'name',
         'description',
+        'quantity',
         'status',
+        'is_loanable',
+        'loan_type',
+        'max_loan_duration',
         'image_url',
         'metadata',
     ];
@@ -28,6 +32,7 @@ class Item extends Model
      */
     protected $casts = [
         'metadata' => 'array',
+        'is_loanable' => 'boolean',
     ];
 
     /**
@@ -44,5 +49,29 @@ class Item extends Model
     public function location(): BelongsTo
     {
         return $this->belongsTo(Location::class);
+    }
+
+    /**
+     * Get the loans for the item.
+     */
+    public function loans(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->hasMany(Loan::class);
+    }
+
+    /**
+     * Get the active loan for the item.
+     */
+    public function getCurrentLoanAttribute(): ?Loan
+    {
+        return $this->loans()->whereNull('returned_at')->latest()->first();
+    }
+
+    /**
+     * Get the adjustments for the item.
+     */
+    public function adjustments(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->hasMany(InventoryAdjustment::class);
     }
 }

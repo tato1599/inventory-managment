@@ -24,7 +24,7 @@
         <x-mary-menu-item title="Activos & Hardware" icon="o-cpu-chip" link="{{ route('inventory.index') }}"
             class="rounded-xl font-medium" />
 
-        <x-mary-menu-item title="Áreas del Nodo" icon="o-map-pin" link="{{ route('locations.index') }}"
+        <x-mary-menu-item title="Ubicaciones" icon="o-map-pin" link="{{ route('locations.index') }}"
             class="rounded-xl font-medium" />
 
         <x-mary-menu-separator title="Operaciones" />
@@ -32,8 +32,8 @@
         <x-mary-menu-item title="Préstamos" icon="o-arrow-path" link="#"
             class="rounded-xl font-medium opacity-50 cursor-not-allowed" />
 
-        <x-mary-menu-item title="Ajustes" icon="o-cog-6-tooth" link="#"
-            class="rounded-xl font-medium opacity-50 cursor-not-allowed" />
+        <x-mary-menu-item title="Ajustes" icon="o-cog-6-tooth" link="{{ route('inventory.adjustments') }}"
+            class="rounded-xl font-medium" />
     </x-mary-menu>
 
     {{-- LOGOUT BUTTON --}}

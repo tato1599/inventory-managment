@@ -17,11 +17,17 @@
         <!-- Styles -->
         @livewireStyles
     </head>
-    <body>
-        <div class="font-sans text-gray-900 antialiased">
+    <body class="min-h-screen font-sans antialiased bg-base-200/50 dark:bg-base-200 transition-colors duration-300">
+        <div class="text-gray-900 dark:text-gray-100 antialiased">
             {{ $slot }}
         </div>
 
+        <script>
+            // Simple theme sync for guest layout
+            const theme = localStorage.getItem('mary-theme') || 'light';
+            document.documentElement.setAttribute('data-theme', theme);
+            if (theme === 'dark') document.documentElement.classList.add('dark');
+        </script>
         @livewireScripts
     </body>
 </html>

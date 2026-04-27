@@ -1,10 +1,10 @@
 <div>
     {{-- HEADER --}}
-    <x-mary-header title="Áreas del Nodo NCIE" subtitle="Zonas de trabajo especializadas: IA, Prototipado y Coworking" separator progress-indicator>
+    <x-mary-header title="Ubicaciones de Inventario" subtitle="Gestión de áreas, almacenes y espacios de almacenamiento" separator progress-indicator>
         <x-slot:actions>
             <x-mary-button 
                 icon="o-plus" 
-                label="Nueva Área / Zona" 
+                label="Nueva Ubicación" 
                 @click="$wire.createDrawer = true"
                 class="btn-primary rounded-xl font-black shadow-lg shadow-primary/20" 
             />
@@ -66,7 +66,7 @@
                     <x-mary-button 
                         icon="o-trash" 
                         class="btn-ghost btn-xs text-base-content/10 hover:text-error transition-colors" 
-                        wire:confirm="¿Estás seguro de eliminar esta área?"
+                        wire:confirm="¿Estás seguro de eliminar esta ubicación?"
                         wire:click="delete({{ $location->id }})" 
                     />
                 </div>
@@ -75,7 +75,7 @@
     </x-mary-card>
 
     {{-- Create Location Drawer --}}
-    <x-mary-drawer wire:model="createDrawer" title="Configurar Nueva Área" separator right class="w-11/12 lg:w-1/3 p-0">
+    <x-mary-drawer wire:model="createDrawer" title="Configurar Nueva Ubicación" separator right class="w-11/12 lg:w-1/3 p-0">
         <x-mary-form wire:submit="save" class="p-6 space-y-6">
             <div class="space-y-4">
                 <div class="bg-base-200 p-8 rounded-3xl text-center flex flex-col items-center mb-4">
@@ -83,7 +83,7 @@
                     <p class="text-[10px] uppercase font-black text-base-content/30 tracking-widest leading-none">Añadir Espacio de Trabajo</p>
                 </div>
 
-                <x-mary-input label="Nombre del Área / Zona" wire:model="newLocation.name" icon="o-home" placeholder="Ej. Laboratorio de IA, Zona 3D" />
+                <x-mary-input label="Nombre de la Ubicación" wire:model="newLocation.name" icon="o-home" placeholder="Ej. Almacén Central, Estantería A" />
                 <x-mary-input label="Código del Espacio" wire:model="newLocation.code" icon="o-hashtag" placeholder="Ej. L-IA-01" />
                 
                 <x-mary-textarea label="Descripción de la Zona" wire:model="newLocation.description" placeholder="Uso específico del área y equipamiento disponible..." rows="4" />
@@ -91,7 +91,7 @@
 
             <x-slot:actions>
                 <x-mary-button label="Cancelar" @click="$wire.createDrawer = false" class="btn-ghost rounded-xl" />
-                <x-mary-button label="Guardar Área" icon="o-check" type="submit" class="btn-primary rounded-xl px-6" spinner="save" />
+                <x-mary-button label="Guardar Ubicación" icon="o-check" type="submit" class="btn-primary rounded-xl px-6" spinner="save" />
             </x-slot:actions>
         </x-mary-form>
     </x-mary-drawer>

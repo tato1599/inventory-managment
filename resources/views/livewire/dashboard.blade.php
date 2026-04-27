@@ -1,6 +1,6 @@
 <div>
     {{-- HEADER --}}
-    <x-mary-header title="Tablero de Control" subtitle="Resumen ejecutivo del estado del hardware en el Nodo NCIE" separator progress-indicator>
+    <x-mary-header title="Tablero de Control" subtitle="Resumen ejecutivo del estado del inventario" separator progress-indicator>
         <x-slot:actions>
         </x-slot:actions>
     </x-mary-header>
@@ -11,7 +11,7 @@
             <x-mary-stat
                 title="Capacidad Total"
                 value="{{ number_format($this->stats['total_items']) }}"
-                description="Activos en {{ $this->stats['categories_count'] }} áreas"
+                description="Activos en {{ $this->stats['categories_count'] }} categorías"
                 icon="o-cpu-chip"
                 class="bg-base-100 shadow-sm border-none rounded-2xl"
                 color="text-primary"
@@ -20,7 +20,7 @@
             <x-mary-stat
                 title="En Uso"
                 value="{{ number_format($this->stats['loaned_items']) }}"
-                description="Proyectos activos"
+                description="Préstamos activos"
                 icon="o-rocket-launch"
                 class="bg-base-100 shadow-sm border-none rounded-2xl"
                 color="text-info"
@@ -36,7 +36,7 @@
             />
             
             <x-mary-stat
-                title="Áreas del Nodo"
+                title="Ubicaciones"
                 value="{{ $this->stats['locations_count'] }}"
                 description="Zonas configuradas"
                 icon="o-map-pin"
@@ -48,7 +48,7 @@
         <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
             {{-- ACTIVITY FEED --}}
             <section class="lg:col-span-8">
-                <x-mary-card title="Canal de Innovación" subtitle="Activos registrados recientemente" separator shadow>
+                <x-mary-card title="Actividad Reciente" subtitle="Activos registrados recientemente" separator shadow>
                     <div class="space-y-2">
                         @forelse($this->recentItems as $item)
                             <div class="flex items-center p-4 hover:bg-base-200/50 rounded-2xl transition-colors group">
@@ -66,8 +66,7 @@
                                 </div>
                             </div>
                         @empty
-                            <div class="py-12 text-center text-base-content/30 italic text-sm">
-                                No hay actividad reciente registrada en el laboratorio.
+                                No hay actividad reciente registrada en el sistema.
                             </div>
                         @endforelse
                     </div>
@@ -113,7 +112,7 @@
         </div>
 
         {{-- VISUAL TREND CARD --}}
-        <x-mary-card title="Flujo de Prototipado" subtitle="Estimación de uso semanal de hardware" shadow>
+        <x-mary-card title="Flujo de Inventario" subtitle="Estimación de uso semanal de activos" shadow>
             <div class="h-48 flex items-end justify-between space-x-2 px-2">
                 @foreach($this->chartData as $index => $h)
                     <div class="w-full bg-base-200 rounded-t-xl relative group overflow-hidden" style="height: 100%">

@@ -1,7 +1,13 @@
 <div>
     {{-- HEADER --}}
-    <x-mary-header title="Inventario de Innovación" subtitle="Hardware avanzado para IA, Impresión 3D y Prototipado" separator progress-indicator>
+    <x-mary-header title="Inventario de Activos" subtitle="Gestión integral de hardware, herramientas y equipamiento" separator progress-indicator>
         <x-slot:actions>
+            <x-mary-button 
+                icon="o-clipboard-document-check" 
+                label="{{ $auditMode ? 'Finalizar Auditoría' : 'Inventario Cíclico' }}" 
+                wire:click="toggleAuditMode"
+                class="{{ $auditMode ? 'btn-warning' : 'btn-ghost border-base-300' }} rounded-xl font-bold" 
+            />
             <x-mary-button 
                 icon="o-plus" 
                 label="Registrar Activo" 
@@ -60,8 +66,26 @@
             selectable-key="id" 
             wire:model.live="selectedIds"
             @row-click="$wire.showDrawer = true; $wire.showDetails($event.detail.id)" 
-            class="mary-table-custom"
+            class="mary-table-custom {{ $auditMode ? 'mary-table-audit' : '' }}"
         >
+            {{-- Audit Cell --}}
+            @if($auditMode)
+                @scope('cell_id', $item)
+                    <div class="flex justify-center">
+                        @if(isset($auditData[$item->id]))
+                            <div class="w-8 h-8 bg-success/20 text-success rounded-full flex items-center justify-center animate-in zoom-in duration-300">
+                                <x-mary-icon name="o-check" class="w-5 h-5" />
+                            </div>
+                        @else
+                            <x-mary-button 
+                                icon="o-check" 
+                                wire:click.stop="markAsVerified({{ $item->id }})" 
+                                class="btn-ghost btn-circle btn-sm border-base-300 hover:bg-success hover:text-white" 
+                            />
+                        @endif
+                    </div>
+                @endscope
+            @endif
             {{-- SKU Cell --}}
             @scope('cell_sku', $item)
                 <span class="font-mono text-[10px] tracking-widest text-base-content/40 bg-base-200 px-2 py-1 rounded-md">
@@ -86,28 +110,39 @@
             @scope('cell_location.name', $item)
                 <div class="flex items-center gap-2 text-base-content/60">
                     <x-mary-icon name="o-map-pin" class="w-3 h-3" />
-                    <span class="text-xs font-semibold">{{ $item->location?->name ?: 'Sin área' }}</span>
+                    <span class="text-xs font-semibold uppercase tracking-tighter">{{ $item->location?->name ?: 'Área General' }}</span>
+                </div>
+            @endscope
+
+            {{-- Loanable Cell --}}
+            @scope('cell_is_loanable', $item)
+                <div class="flex justify-center">
+                    @if($item->is_loanable)
+                        <div class="badge badge-success badge-outline gap-1 py-3 px-3 rounded-xl border-2">
+                            <x-mary-icon name="o-check" class="w-3 h-3" />
+                            <span class="text-[9px] font-black uppercase tracking-tighter">SÍ</span>
+                        </div>
+                    @else
+                        <div class="badge badge-ghost gap-1 py-3 px-3 rounded-xl opacity-30">
+                            <x-mary-icon name="o-x-mark" class="w-3 h-3" />
+                            <span class="text-[9px] font-black uppercase tracking-tighter">NO</span>
+                        </div>
+                    @endif
                 </div>
             @endscope
 
             {{-- Status Cell --}}
             @scope('cell_status', $item)
                 @php
-                    $colors = [
+                    $statusStyles = [
                         'available' => 'badge-success',
                         'loaned' => 'badge-info',
                         'maintenance' => 'badge-warning',
                         'lost' => 'badge-error'
                     ];
-                    $labels = [
-                        'available' => 'Disponible',
-                        'loaned' => 'En Uso',
-                        'maintenance' => 'Revisión',
-                        'lost' => 'Extraviado'
-                    ];
                 @endphp
-                <div class="badge {{ $colors[$item->status] }} badge-outline font-bold text-[10px] py-3 px-4 border-2">
-                    {{ $labels[$item->status] }}
+                <div class="badge {{ $statusStyles[$item->status] }} badge-outline font-black text-[10px] uppercase tracking-widest py-3 px-4 rounded-xl border-2">
+                    {{ $item->status }}
                 </div>
             @endscope
 
@@ -146,88 +181,45 @@
     {{-- Create Item Drawer --}}
     <x-mary-drawer wire:model="createDrawer" title="Nuevo Artículo" separator right class="w-11/12 lg:w-1/3 p-0">
         <div class="p-6 space-y-6">
-            {{-- Header section --}}
             <div class="flex items-center gap-4 bg-base-200 p-6 rounded-2xl">
                 <div class="w-12 h-12 bg-primary rounded-xl flex items-center justify-center text-white shadow-lg">
                     <x-mary-icon name="o-rocket-launch" class="w-6 h-6" />
                 </div>
                 <div>
                     <h3 class="text-lg font-black tracking-tight">Registro de Hardware</h3>
-                    <p class="text-[10px] uppercase font-bold text-base-content/40 tracking-widest">Añadir al inventario del Nodo</p>
+                    <p class="text-[10px] uppercase font-black text-primary tracking-[0.2em]">Gestión de Activos Tecnológicos</p>
                 </div>
             </div>
 
             <div class="space-y-6">
-                <x-mary-input 
-                    label="Nombre del Artículo" 
-                    wire:model="newItem.name" 
-                    icon="o-pencil-square" 
-                    placeholder="Ej. Estación de Trabajo GPU" 
-                    class="rounded-xl"
-                />
-
-                <x-mary-input 
-                    label="SKU / Identificador" 
-                    wire:model="newItem.sku" 
-                    icon="o-hashtag" 
-                    placeholder="Ej. NCIE-IA-042" 
-                    class="rounded-xl font-mono"
-                />
+                <x-mary-input label="Nombre del Artículo" wire:model="newItem.name" icon="o-pencil-square" placeholder="Ej. Estación de Trabajo GPU" class="rounded-xl" />
+                <x-mary-input label="SKU / Identificador" wire:model="newItem.sku" icon="o-hashtag" placeholder="Ej. INV-001" class="rounded-xl font-mono" />
+                <x-mary-input label="Existencia Inicial" type="number" wire:model="newItem.quantity" icon="o-archive-box" class="rounded-xl" />
                 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <x-mary-choices 
-                        label="Categoría" 
-                        wire:model="newItem.category_id" 
-                        :options="$this->categories" 
-                        icon="o-tag" 
-                        placeholder="Elegir..." 
-                        single
-                    />
-                    <x-mary-choices 
-                        label="Ubicación" 
-                        wire:model="newItem.location_id" 
-                        :options="$this->locations" 
-                        icon="o-map-pin" 
-                        placeholder="Elegir..." 
-                        single
-                    />
+                    <x-mary-choices label="Categoría" wire:model="newItem.category_id" :options="$this->categories" icon="o-tag" placeholder="Elegir..." single />
+                    <x-mary-choices label="Ubicación" wire:model="newItem.location_id" :options="$this->locations" icon="o-map-pin" placeholder="Elegir..." single />
                 </div>
 
-                <x-mary-select 
-                    label="Estado Inicial" 
-                    wire:model="newItem.status" 
-                    :options="[
-                        ['id' => 'available', 'name' => 'Disponible'],
-                        ['id' => 'loaned', 'name' => 'En Uso'],
-                        ['id' => 'maintenance', 'name' => 'Mantenimiento']
-                    ]" 
-                    icon="o-check-circle"
-                    class="rounded-xl"
-                />
+                <x-mary-select label="Estado Inicial" wire:model="newItem.status" :options="[['id' => 'available', 'name' => 'Disponible'], ['id' => 'loaned', 'name' => 'En Uso'], ['id' => 'maintenance', 'name' => 'Mantenimiento']]" icon="o-check-circle" class="rounded-xl" />
 
-                <x-mary-textarea 
-                    label="Descripción Técnica" 
-                    wire:model="newItem.description" 
-                    placeholder="Detalles del hardware..." 
-                    rows="4" 
-                    class="rounded-xl" 
-                />
+                <div class="bg-base-200/50 p-4 rounded-[2rem] border border-base-300/50 space-y-4">
+                    <x-mary-toggle label="Habilitar para Préstamo" wire:model.live="newItem.is_loanable" tight class="font-bold text-primary" />
+                    @if($newItem['is_loanable'])
+                        <div class="space-y-4 animate-in slide-in-from-top-2 duration-300">
+                            <x-mary-select label="Tipo de Uso" wire:model.live="newItem.loan_type" :options="[['id' => 'daily', 'name' => 'Días (Uso Prolongado)'], ['id' => 'hourly', 'name' => 'Horas (Equipo Especializado)']]" icon="o-clock" class="rounded-xl" />
+                            <x-mary-input label="Duración Máxima" wire:model="newItem.max_loan_duration" type="number" placeholder="Ej. 48" suffix="{{ $newItem['loan_type'] == 'daily' ? 'Días' : 'Horas' }}" class="rounded-xl" />
+                        </div>
+                    @endif
+                </div>
+
+                <x-mary-textarea label="Descripción Técnica" wire:model="newItem.description" placeholder="Detalles del hardware..." rows="4" class="rounded-xl" />
             </div>
         </div>
 
         <x-slot:actions>
-            <x-mary-button 
-                label="Cancelar" 
-                @click="$wire.createDrawer = false" 
-                class="btn-ghost rounded-xl font-bold" 
-            />
-            <x-mary-button 
-                label="Registrar Activo" 
-                icon="o-check" 
-                wire:click="saveItem" 
-                class="btn-primary rounded-xl font-black shadow-lg shadow-primary/20 px-8" 
-                spinner="saveItem" 
-            />
+            <x-mary-button label="Cancelar" @click="$wire.createDrawer = false" class="btn-ghost rounded-xl font-bold" />
+            <x-mary-button label="Registrar Activo" icon="o-check" wire:click="saveItem" class="btn-primary rounded-xl font-black shadow-lg shadow-primary/20 px-8" spinner="saveItem" />
         </x-slot:actions>
     </x-mary-drawer>
 
@@ -235,7 +227,17 @@
     <x-mary-drawer wire:model="showDrawer" title="Expediente del Activo" separator right class="w-11/12 lg:w-1/3 p-0">
         @if ($selectedItem)
             <div class="p-8 space-y-8">
-                {{-- Hero Header Inside Drawer --}}
+                {{-- Adjustment Action --}}
+                <div class="flex justify-end">
+                    <x-mary-button 
+                        icon="o-adjustments-horizontal" 
+                        label="Ajustar Inventario" 
+                        wire:click="openAdjustment"
+                        class="btn-ghost btn-sm text-[10px] font-black uppercase tracking-widest text-primary hover:bg-primary/5 rounded-xl" 
+                    />
+                </div>
+
+                {{-- Hero Header --}}
                 <div class="relative overflow-hidden bg-gradient-to-br from-primary to-secondary p-8 rounded-[2.5rem] text-white shadow-2xl shadow-primary/20">
                     <div class="relative z-10">
                         <div class="w-14 h-14 bg-white/20 backdrop-blur-md rounded-2xl flex items-center justify-center mb-4">
@@ -247,60 +249,117 @@
                             <span class="text-[10px] font-black uppercase tracking-widest bg-white text-primary px-3 py-1 rounded-full">{{ $selectedItem->category->name }}</span>
                         </div>
                     </div>
-                    {{-- Decorative Circle --}}
                     <div class="absolute -right-10 -top-10 w-40 h-40 bg-white/10 rounded-full blur-3xl"></div>
                 </div>
 
-                {{-- Status & Location Grid --}}
-                <div class="grid grid-cols-2 gap-4">
+                {{-- Status Grid --}}
+                <div class="grid grid-cols-3 gap-4">
                     <div class="bg-base-200/50 p-6 rounded-[2rem] border border-base-300/50">
                         <p class="text-[10px] uppercase font-black text-base-content/30 tracking-widest mb-2">Estado</p>
-                        @php
-                            $statusColors = [
-                                'available' => 'text-success',
-                                'loaned' => 'text-info',
-                                'maintenance' => 'text-warning',
-                                'lost' => 'text-error'
-                            ];
-                        @endphp
-                        <span class="text-sm font-black {{ $statusColors[$selectedItem->status] }} uppercase tracking-tighter">
-                            {{ $selectedItem->status }}
-                        </span>
+                        @php $statusColors = ['available' => 'text-success', 'loaned' => 'text-info', 'maintenance' => 'text-warning', 'lost' => 'text-error']; @endphp
+                        <span class="text-sm font-black {{ $statusColors[$selectedItem->status] }} uppercase tracking-tighter">{{ $selectedItem->status }}</span>
+                    </div>
+                    <div class="bg-base-200/50 p-6 rounded-[2rem] border border-base-300/50">
+                        <p class="text-[10px] uppercase font-black text-base-content/30 tracking-widest mb-2">Existencia</p>
+                        <span class="text-sm font-black text-primary tracking-tighter">{{ $selectedItem->quantity }} unid.</span>
                     </div>
                     <div class="bg-base-200/50 p-6 rounded-[2rem] border border-base-300/50">
                         <p class="text-[10px] uppercase font-black text-base-content/30 tracking-widest mb-2">Ubicación</p>
-                        <span class="text-sm font-black text-base-content uppercase tracking-tighter">{{ $selectedItem->location?->name ?: 'ÁREA GENERAL' }}</span>
+                        <span class="text-sm font-black text-base-content uppercase tracking-tighter">{{ $selectedItem->location?->name ?: 'GENERAL' }}</span>
                     </div>
                 </div>
 
-                {{-- Description Section --}}
-                <div class="space-y-4">
-                    <x-mary-hr label="Ficha Técnica" class="opacity-50" />
-                    <div class="bg-base-100 border border-base-300 rounded-[2rem] p-8 shadow-sm">
-                        <p class="text-sm leading-relaxed text-base-content/70 italic">
-                            {{ $selectedItem->description ?: 'Sin especificaciones técnicas registradas para este activo.' }}
-                        </p>
-                    </div>
-                </div>
-
-                {{-- Footer Info --}}
-                <div class="flex items-center justify-between p-6 bg-base-200/30 rounded-2xl border border-dashed border-base-300">
-                    <div class="flex items-center gap-3">
-                        <x-mary-icon name="o-calendar" class="w-5 h-5 text-base-content/30" />
-                        <div>
-                            <p class="text-[9px] uppercase font-black text-base-content/30 tracking-widest">Fecha de Registro</p>
-                            <p class="text-xs font-bold">{{ $selectedItem->created_at->format('d/m/Y') }}</p>
+                @if($selectedItem->is_loanable)
+                    <div class="bg-primary/5 p-8 rounded-[2.5rem] border border-primary/20 shadow-inner">
+                        <div class="flex items-center gap-4 mb-6">
+                            <div class="w-10 h-10 bg-primary rounded-xl flex items-center justify-center text-white"><x-mary-icon name="o-arrows-right-left" class="w-5 h-5" /></div>
+                            <div>
+                                <h4 class="text-xs font-black uppercase tracking-widest text-primary">Política de Préstamo</h4>
+                                <p class="text-[10px] text-primary/50 font-bold uppercase tracking-tighter">Habilitado para salida</p>
+                            </div>
+                        </div>
+                        <div class="grid grid-cols-2 gap-8">
+                            <div class="space-y-1">
+                                <p class="text-[9px] uppercase font-black text-base-content/30 tracking-widest">Modalidad</p>
+                                <div class="flex items-center gap-2"><x-mary-icon name="{{ $selectedItem->loan_type == 'daily' ? 'o-calendar' : 'o-clock' }}" class="w-4 h-4 text-primary/60" /><p class="text-sm font-black text-primary uppercase">{{ $selectedItem->loan_type == 'daily' ? 'Por Días' : 'Por Horas' }}</p></div>
+                            </div>
+                            <div class="space-y-1">
+                                <p class="text-[9px] uppercase font-black text-base-content/30 tracking-widest">Tiempo Límite</p>
+                                <div class="flex items-center gap-2"><x-mary-icon name="o-variable" class="w-4 h-4 text-primary/60" /><p class="text-sm font-black text-primary uppercase">{{ $selectedItem->max_loan_duration ?: 'Ilimitado' }} {{ $selectedItem->loan_type == 'daily' ? 'Días' : 'Horas' }}</p></div>
+                            </div>
                         </div>
                     </div>
-                    <x-mary-button icon="o-pencil" class="btn-ghost btn-sm rounded-xl" tooltip="Editar información" />
+
+                    @if($selectedItem->status == 'available')
+                        <div class="bg-base-200/50 p-8 rounded-[2.5rem] border border-base-300 space-y-6">
+                            <div class="flex items-center gap-3"><x-mary-icon name="o-user-plus" class="w-5 h-5 text-primary" /><h4 class="text-xs font-black uppercase tracking-widest">Asignar Préstamo</h4></div>
+                            <x-mary-input label="Nombre del Beneficiario" wire:model="loanData.borrower_name" placeholder="Ej. Juan Pérez" icon="o-user" class="rounded-xl" />
+                            <x-mary-input label="Matrícula / ID" wire:model="loanData.borrower_id_number" placeholder="Ej. L0123456" icon="o-identification" class="rounded-xl" />
+                            <x-mary-button label="Registrar Salida" wire:click="registerLoan" class="btn-primary w-full rounded-2xl font-black shadow-lg shadow-primary/20" spinner="registerLoan" />
+                        </div>
+                    @elseif($selectedItem->status == 'loaned')
+                        <div class="bg-error/5 p-8 rounded-[2.5rem] border border-error/20 space-y-6">
+                            <div class="flex items-center gap-4">
+                                <div class="w-12 h-12 bg-error rounded-2xl flex items-center justify-center text-white shadow-lg"><x-mary-icon name="o-user-circle" class="w-7 h-7" /></div>
+                                <div><h4 class="text-[10px] font-black uppercase tracking-widest text-error opacity-70">En posesión de:</h4><p class="text-xl font-black text-base-content leading-none">{{ $selectedItem->current_loan?->borrower_name }}</p></div>
+                            </div>
+                            <div class="flex items-center justify-between p-4 bg-white/50 dark:bg-base-100/50 rounded-2xl border border-dashed border-error/20">
+                                <div><p class="text-[9px] uppercase font-black text-base-content/30 tracking-widest">Fecha de Salida</p><p class="text-xs font-bold">{{ $selectedItem->current_loan?->loaned_at->format('d/m/Y H:i') }}</p></div>
+                                <x-mary-button label="Recibir Equipo" wire:click="returnItem" class="btn-error btn-sm rounded-xl font-black text-white" spinner="returnItem" />
+                            </div>
+                        </div>
+                    @endif
+                @endif
+
+                <div class="space-y-4">
+                    <x-mary-hr label="Ficha Técnica" class="opacity-50" />
+                    <p class="text-xs text-base-content/70 leading-relaxed bg-base-200/30 p-6 rounded-[2rem] border border-base-300/30 italic">{{ $selectedItem->description ?: 'No hay descripción adicional para este activo.' }}</p>
+                </div>
+
+                <div class="space-y-4">
+                    <x-mary-hr label="Historial de Auditoría" class="opacity-50" />
+                    <div class="space-y-3">
+                        @forelse($selectedItem->adjustments->sortByDesc('created_at') as $adj)
+                            <div class="bg-base-200/50 p-4 rounded-2xl border border-base-300/50 group hover:border-primary/30 transition-colors">
+                                <div class="flex justify-between items-center mb-2">
+                                    <span class="text-[9px] font-black uppercase text-primary tracking-widest">{{ $adj->user->name }}</span>
+                                    <span class="text-[9px] font-mono text-base-content/30">{{ $adj->created_at->format('d/m/Y H:i') }}</span>
+                                </div>
+                                <p class="text-xs font-bold text-base-content leading-tight mb-2">{{ $adj->notes }}</p>
+                                <div class="flex flex-wrap gap-2">
+                                    @if($adj->old_quantity != $adj->new_quantity)<div class="badge badge-ghost text-[8px] font-black uppercase py-2 tracking-tighter">Stock: {{ $adj->old_quantity }} → {{ $adj->new_quantity }}</div>@endif
+                                    @if($adj->old_status != $adj->new_status)<div class="badge badge-ghost text-[8px] font-black uppercase py-2 tracking-tighter">{{ $adj->old_status }} → {{ $adj->new_status }}</div>@endif
+                                    @if($adj->old_location_id != $adj->new_location_id)<div class="badge badge-ghost text-[8px] font-black uppercase py-2 tracking-tighter">{{ $adj->oldLocation?->name ?: 'N/A' }} → {{ $adj->newLocation?->name }}</div>@endif
+                                </div>
+                            </div>
+                        @empty
+                            <div class="py-8 text-center bg-base-200/20 rounded-[2rem] border border-dashed border-base-300"><p class="text-[10px] uppercase font-bold text-base-content/20 tracking-widest">Sin ajustes registrados</p></div>
+                        @endforelse
+                    </div>
                 </div>
             </div>
         @endif
+    </x-mary-drawer>
 
-        <x-slot:actions>
-            <div class="px-4 w-full">
-                <x-mary-button label="Cerrar Expediente" @click="$wire.showDrawer = false" class="btn-ghost rounded-2xl font-black text-xs uppercase tracking-widest w-full py-4" />
-            </div>
-        </x-slot:actions>
+    {{-- Adjustment Drawer --}}
+    <x-mary-drawer wire:model="showAdjustmentDrawer" title="Ajuste Manual de Inventario" separator right class="w-11/12 lg:w-1/3 p-0">
+        @if($selectedItem)
+            <x-mary-form wire:submit="makeAdjustment" class="p-6 space-y-6">
+                <div class="bg-primary/5 p-8 rounded-[2.5rem] mb-4 border border-primary/10 flex flex-col items-center text-center">
+                    <x-mary-icon name="o-adjustments-vertical" class="w-10 h-10 text-primary opacity-20 mb-3" />
+                    <p class="text-[10px] uppercase font-black text-primary/40 tracking-widest mb-1">Ajustando Activo</p>
+                    <h3 class="text-lg font-black text-base-content leading-tight">{{ $selectedItem->name }}</h3>
+                    <p class="text-xs font-mono text-base-content/30">{{ $selectedItem->sku }}</p>
+                </div>
+                <x-mary-select label="Cambiar Estado" wire:model="adjustmentData.new_status" :options="[['id' => 'available', 'name' => 'Disponible'], ['id' => 'loaned', 'name' => 'En Uso'], ['id' => 'maintenance', 'name' => 'Mantenimiento'], ['id' => 'lost', 'name' => 'Extraviado/Baja']]" icon="o-arrow-path" class="rounded-xl" />
+                <x-mary-input label="Ajustar Cantidad" type="number" wire:model="adjustmentData.new_quantity" icon="o-archive-box" class="rounded-xl" />
+                <x-mary-choices label="Mover a Ubicación" wire:model="adjustmentData.new_location_id" :options="$this->locations" icon="o-map-pin" placeholder="Elegir..." single />
+                <x-mary-textarea label="Motivo del Ajuste" wire:model="adjustmentData.notes" placeholder="Ej. Traslado a taller, reporte de daño físico..." rows="4" class="rounded-xl" />
+                <x-slot:actions>
+                    <x-mary-button label="Cancelar" @click="$wire.showAdjustmentDrawer = false" class="btn-ghost rounded-xl" />
+                    <x-mary-button label="Confirmar Ajuste" icon="o-check" type="submit" class="btn-primary rounded-xl px-8 font-black shadow-lg shadow-primary/20" spinner="makeAdjustment" />
+                </x-slot:actions>
+            </x-mary-form>
+        @endif
     </x-mary-drawer>
 </div>
