@@ -68,6 +68,14 @@
     </x-mary-main>
 
     @stack('modals')
+
+    <script>
+        document.addEventListener('livewire:init', () => {
+            Livewire.on('open-new-tab', (event) => {
+                window.open(event[0].url, '_blank');
+            });
+        });
+    </script>
 </body>
 
 </html>

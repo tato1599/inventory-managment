@@ -67,6 +67,16 @@ class Item extends Model
         return $this->loans()->whereNull('returned_at')->latest()->first();
     }
 
+    public function isLoanOverdue(): bool
+    {
+        if ($this->status !== 'loaned') return false;
+        
+        $loan = $this->current_loan;
+        if (!$loan || !$loan->due_at) return false;
+        
+        return $loan->due_at->isPast();
+    }
+
     /**
      * Get the adjustments for the item.
      */

@@ -140,9 +140,15 @@
                         'maintenance' => 'badge-warning',
                         'lost' => 'badge-error'
                     ];
+                    $isOverdue = $item->isLoanOverdue();
                 @endphp
-                <div class="badge {{ $statusStyles[$item->status] }} badge-outline font-black text-[10px] uppercase tracking-widest py-3 px-4 rounded-xl border-2">
-                    {{ $item->status }}
+                <div class="flex items-center gap-2">
+                    <div class="badge {{ $statusStyles[$item->status] }} badge-outline font-black text-[10px] uppercase tracking-widest py-3 px-4 rounded-xl border-2 {{ $isOverdue ? 'border-error text-error animate-pulse' : '' }}">
+                        {{ $item->status }}
+                    </div>
+                    @if($isOverdue)
+                        <x-mary-icon name="o-clock" class="w-4 h-4 text-error" tooltip="¡PRÉSTAMO VENCIDO!" />
+                    @endif
                 </div>
             @endscope
 
@@ -171,7 +177,7 @@
                 </div>
                 <div class="h-8 w-px bg-white/20"></div>
                 <div class="flex items-center gap-3">
-                    <x-mary-button icon="o-printer" label="Imprimir" class="btn-ghost btn-sm text-xs font-bold bg-white/10 hover:bg-white/20 border-none rounded-2xl" />
+                    <x-mary-button icon="o-printer" label="Imprimir" wire:click="printLabels" class="btn-ghost btn-sm text-xs font-bold bg-white/10 hover:bg-white/20 border-none rounded-2xl" />
                     <x-mary-button icon="o-trash" label="Eliminar" class="btn-ghost btn-sm text-xs font-bold bg-error/20 hover:bg-error/40 border-none rounded-2xl text-white" wire:confirm="¿Eliminar seleccionados?" wire:click="deleteBatch" />
                 </div>
             </div>
@@ -310,6 +316,19 @@
                         </div>
                     @endif
                 @endif
+
+                {{-- Quick Consumption (for materials) --}}
+                <div class="bg-amber-50/50 p-8 rounded-[2.5rem] border border-amber-200/50 space-y-4">
+                    <div class="flex items-center gap-3">
+                        <x-mary-icon name="o-beaker" class="w-5 h-5 text-amber-600" />
+                        <h4 class="text-xs font-black uppercase tracking-widest text-amber-900">Consumo de Material</h4>
+                    </div>
+                    <div class="flex gap-2">
+                        <x-mary-input type="number" wire:model="consumeAmount" placeholder="Cant." class="rounded-xl w-24" />
+                        <x-mary-button label="Descontar Stock" wire:click="consumeStock" class="btn-warning flex-1 rounded-xl font-black" spinner="consumeStock" />
+                    </div>
+                    <p class="text-[9px] text-amber-600/60 font-bold uppercase tracking-tighter">Úsalo para registrar el gasto de materiales consumibles.</p>
+                </div>
 
                 <div class="space-y-4">
                     <x-mary-hr label="Ficha Técnica" class="opacity-50" />

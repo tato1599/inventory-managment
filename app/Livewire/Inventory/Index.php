@@ -31,6 +31,7 @@ class Index extends Component
     public bool $auditMode = false;
     public ?Item $selectedItem = null;
     public array $auditData = [];
+    public int $consumeAmount = 1;
 
     // Form data (New Item)
     public array $newItem = [
@@ -81,7 +82,12 @@ class Index extends Component
     #[Computed]
     public function items(): LengthAwarePaginator
     {
+        $user = auth()->user();
+
         return Item::with(['category', 'location'])
+            ->when($user->hasRole('area-manager'), function (Builder $query) use ($user) {
+                $query->where('location_id', $user->location_id);
+            })
             ->when($this->search, function (Builder $query) {
                 $query->where(function ($q) {
                     $q->where('name', 'like', "%{$this->search}%")
@@ -292,6 +298,82 @@ class Index extends Component
         ]);
         
         $this->resetPage();
+    }
+
+    public function deleteBatch(): void
+    {
+        if (empty($this->selectedIds)) return;
+
+        Item::whereIn('id', $this->selectedIds)->delete();
+
+        $this->dispatch('mary-toast', [
+            'title' => 'Lote eliminado',
+            'description' => count($this->selectedIds) . " activos han sido eliminados.",
+            'type' => 'success'
+        ]);
+
+        $this->selectedIds = [];
+        $this->resetPage();
+    }
+
+    public function printLabels(): void
+    {
+        if (empty($this->selectedIds)) {
+            $this->dispatch('mary-toast', [
+                'title' => 'Error',
+                'description' => 'Selecciona al menos un activo.',
+                'type' => 'error'
+            ]);
+            return;
+        }
+
+        $ids = implode(',', $this->selectedIds);
+        $this->dispatch('open-new-tab', ['url' => route('inventory.print-labels', ['ids' => $ids])]);
+    }
+
+    public function consumeStock(): void
+    {
+        if (!$this->selectedItem) return;
+
+        $this->validate([
+            'consumeAmount' => 'required|integer|min:1'
+        ]);
+
+        if ($this->selectedItem->quantity < $this->consumeAmount) {
+            $this->dispatch('mary-toast', [
+                'title' => 'Error',
+                'description' => 'No hay suficiente stock disponible.',
+                'type' => 'error'
+            ]);
+            return;
+        }
+
+        $oldQuantity = $this->selectedItem->quantity;
+        $newQuantity = $oldQuantity - $this->consumeAmount;
+
+        InventoryAdjustment::create([
+            'item_id' => $this->selectedItem->id,
+            'user_id' => auth()->id(),
+            'type' => 'correction',
+            'old_status' => $this->selectedItem->status,
+            'new_status' => $this->selectedItem->status,
+            'old_location_id' => $this->selectedItem->location_id,
+            'new_location_id' => $this->selectedItem->location_id,
+            'old_quantity' => $oldQuantity,
+            'new_quantity' => $newQuantity,
+            'notes' => "Consumo de material: {$this->consumeAmount} unidades.",
+        ]);
+
+        $this->selectedItem->update(['quantity' => $newQuantity]);
+
+        $this->dispatch('mary-toast', [
+            'title' => 'Stock Actualizado',
+            'description' => "Se han descontado {$this->consumeAmount} unidades.",
+            'type' => 'success'
+        ]);
+
+        $this->consumeAmount = 1;
+        $this->selectedItem->refresh();
     }
 
     public function markAsVerified(int $id): void
