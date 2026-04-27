@@ -5,8 +5,11 @@ namespace App\Livewire;
 use App\Models\Item;
 use App\Models\Category;
 use App\Models\Location;
+use App\Models\InventoryAdjustment;
+use App\Models\Loan;
 use Livewire\Component;
 use Livewire\Attributes\Computed;
+use Illuminate\Support\Facades\DB;
 
 class Dashboard extends Component
 {
@@ -14,41 +17,57 @@ class Dashboard extends Component
     public function stats(): array
     {
         return [
-            'total_items' => Item::count(),
+            'total_items' => Item::sum('quantity'),
             'loaned_items' => Item::where('status', 'loaned')->count(),
             'maintenance_items' => Item::where('status', 'maintenance')->count(),
-            'categories_count' => Category::count(),
-            'locations_count' => Location::count(),
+            'overdue_loans' => Loan::whereNull('returned_at')->where('due_at', '<', now())->count(),
         ];
     }
 
     #[Computed]
-    public function recentItems()
+    public function recentActivity()
     {
-        return Item::with(['category', 'location'])
+        return InventoryAdjustment::with(['item', 'user', 'newLocation'])
             ->latest()
             ->take(6)
             ->get();
     }
 
     #[Computed]
+    public function topLocations()
+    {
+        return Location::withCount('items')
+            ->orderByDesc('items_count')
+            ->take(4)
+            ->get();
+    }
+
+    #[Computed]
     public function alertItems()
     {
-        // For actual production, this would query specific health metrics.
-        // For now, we fetch items marked with "maintenance" or "lost" as alerts.
-        return Item::whereIn('status', ['maintenance', 'lost'])
+        // Items with overdue loans or marked as lost
+        return Item::where('status', 'lost')
+            ->orWhereHas('loans', function($q) {
+                $q->whereNull('returned_at')->where('due_at', '<', now());
+            })
             ->latest()
-            ->take(3)
+            ->take(5)
             ->get();
     }
 
     #[Computed]
     public function chartData(): array
     {
-        // Mocking a weekly trend based on real data would require a 'loans' table.
-        // For now, let's just create a dynamic but safe representation of current inventory spread.
-        // We ensure we don't have hardcoded heights in the view.
-        return [25, 45, 30, 60, 40, 50, 35]; 
+        // Real weekly trend of loans registered
+        $days = collect(range(0, 6))->map(fn($i) => now()->subDays($i)->format('Y-m-d'))->reverse();
+        
+        $data = Loan::select(DB::raw('DATE(loaned_at) as date'), DB::raw('count(*) as count'))
+            ->where('loaned_at', '>=', now()->subDays(7))
+            ->groupBy('date')
+            ->get()
+            ->pluck('count', 'date');
+
+        return $days->map(fn($date) => $data->get($date, 0))->toArray();
     }
 
     public function render()
