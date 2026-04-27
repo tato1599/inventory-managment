@@ -146,30 +146,49 @@
     {{-- Create Item Drawer --}}
     <x-mary-drawer wire:model="createDrawer" title="Nuevo Artículo" separator right class="w-11/12 lg:w-1/3 p-0">
         <div class="p-6 space-y-6">
-            <div class="space-y-4">
-                <div class="bg-base-200 p-8 rounded-3xl text-center flex flex-col items-center">
-                    <x-mary-icon name="o-rocket-launch" class="w-12 h-12 text-primary opacity-20 mb-2" />
-                    <p class="text-[10px] uppercase font-black text-base-content/30 tracking-widest leading-none">Añadir Activo al Nodo</p>
+            {{-- Header section --}}
+            <div class="flex items-center gap-4 bg-base-200 p-6 rounded-2xl">
+                <div class="w-12 h-12 bg-primary rounded-xl flex items-center justify-center text-white shadow-lg">
+                    <x-mary-icon name="o-rocket-launch" class="w-6 h-6" />
                 </div>
+                <div>
+                    <h3 class="text-lg font-black tracking-tight">Registro de Hardware</h3>
+                    <p class="text-[10px] uppercase font-bold text-base-content/40 tracking-widest">Añadir al inventario del Nodo</p>
+                </div>
+            </div>
 
-                <x-mary-input label="Nombre del Artículo" wire:model="newItem.name" icon="o-cube" placeholder="Ej. GPU RTX 4090" />
-                <x-mary-input label="SKU / Identificador" wire:model="newItem.sku" icon="o-hashtag" placeholder="Ej. HW-IA-001" />
+            <div class="space-y-6">
+                <x-mary-input 
+                    label="Nombre del Artículo" 
+                    wire:model="newItem.name" 
+                    icon="o-pencil-square" 
+                    placeholder="Ej. Estación de Trabajo GPU" 
+                    class="rounded-xl"
+                />
+
+                <x-mary-input 
+                    label="SKU / Identificador" 
+                    wire:model="newItem.sku" 
+                    icon="o-hashtag" 
+                    placeholder="Ej. NCIE-IA-042" 
+                    class="rounded-xl font-mono"
+                />
                 
-                <div class="grid grid-cols-2 gap-4">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <x-mary-choices 
                         label="Categoría" 
                         wire:model="newItem.category_id" 
                         :options="$this->categories" 
                         icon="o-tag" 
-                        placeholder="Seleccionar..." 
+                        placeholder="Elegir..." 
                         single
                     />
                     <x-mary-choices 
-                        label="Ubicación / Área" 
+                        label="Ubicación" 
                         wire:model="newItem.location_id" 
                         :options="$this->locations" 
                         icon="o-map-pin" 
-                        placeholder="Seleccionar..." 
+                        placeholder="Elegir..." 
                         single
                     />
                 </div>
@@ -183,68 +202,105 @@
                         ['id' => 'maintenance', 'name' => 'Mantenimiento']
                     ]" 
                     icon="o-check-circle"
+                    class="rounded-xl"
                 />
 
-                <x-mary-textarea label="Descripción Técnica" wire:model="newItem.description" placeholder="Detalles de hardware, garantía, componentes..." rows="4" />
+                <x-mary-textarea 
+                    label="Descripción Técnica" 
+                    wire:model="newItem.description" 
+                    placeholder="Detalles del hardware..." 
+                    rows="4" 
+                    class="rounded-xl" 
+                />
             </div>
         </div>
 
         <x-slot:actions>
-            <x-mary-button label="Cancelar" @click="$wire.createDrawer = false" class="btn-ghost rounded-xl" />
-            <x-mary-button label="Registrar Activo" icon="o-check" wire:click="saveItem" class="btn-primary rounded-xl px-6" spinner="saveItem" />
+            <x-mary-button 
+                label="Cancelar" 
+                @click="$wire.createDrawer = false" 
+                class="btn-ghost rounded-xl font-bold" 
+            />
+            <x-mary-button 
+                label="Registrar Activo" 
+                icon="o-check" 
+                wire:click="saveItem" 
+                class="btn-primary rounded-xl font-black shadow-lg shadow-primary/20 px-8" 
+                spinner="saveItem" 
+            />
         </x-slot:actions>
     </x-mary-drawer>
 
     {{-- Details Drawer --}}
-    <x-mary-drawer wire:model="showDrawer" title="Detalles del Activo" separator right class="w-11/12 lg:w-1/3 p-0">
+    <x-mary-drawer wire:model="showDrawer" title="Expediente del Activo" separator right class="w-11/12 lg:w-1/3 p-0">
         @if ($selectedItem)
-            <div class="p-6 space-y-8">
-                {{-- Header Inside Drawer --}}
-                <div class="flex items-start justify-between">
-                    <div class="flex items-center gap-4">
-                        <div class="w-16 h-16 bg-primary/10 rounded-2xl flex items-center justify-center text-primary">
-                            <x-mary-icon name="o-cpu-chip" class="w-8 h-8" />
+            <div class="p-8 space-y-8">
+                {{-- Hero Header Inside Drawer --}}
+                <div class="relative overflow-hidden bg-gradient-to-br from-primary to-secondary p-8 rounded-[2.5rem] text-white shadow-2xl shadow-primary/20">
+                    <div class="relative z-10">
+                        <div class="w-14 h-14 bg-white/20 backdrop-blur-md rounded-2xl flex items-center justify-center mb-4">
+                            <x-mary-icon name="o-cpu-chip" class="w-8 h-8 text-white" />
                         </div>
-                        <div>
-                            <h2 class="text-2xl font-black tracking-tighter leading-none">{{ $selectedItem->name }}</h2>
-                            <p class="text-[10px] font-mono text-base-content/40 mt-1 uppercase">{{ $selectedItem->sku }}</p>
+                        <h2 class="text-3xl font-black tracking-tighter leading-none">{{ $selectedItem->name }}</h2>
+                        <div class="flex items-center gap-2 mt-3">
+                            <span class="text-[10px] font-mono bg-white/20 px-2 py-1 rounded-md uppercase tracking-widest">{{ $selectedItem->sku }}</span>
+                            <span class="text-[10px] font-black uppercase tracking-widest bg-white text-primary px-3 py-1 rounded-full">{{ $selectedItem->category->name }}</span>
                         </div>
                     </div>
+                    {{-- Decorative Circle --}}
+                    <div class="absolute -right-10 -top-10 w-40 h-40 bg-white/10 rounded-full blur-3xl"></div>
                 </div>
 
-                {{-- Key Stats Inside Drawer --}}
+                {{-- Status & Location Grid --}}
                 <div class="grid grid-cols-2 gap-4">
-                    <div class="bg-base-200 p-4 rounded-2xl">
-                        <p class="text-[10px] uppercase font-bold text-base-content/40 tracking-widest mb-1">Estado Actual</p>
-                        <span class="text-xs font-black text-primary">{{ strtoupper($selectedItem->status) }}</span>
+                    <div class="bg-base-200/50 p-6 rounded-[2rem] border border-base-300/50">
+                        <p class="text-[10px] uppercase font-black text-base-content/30 tracking-widest mb-2">Estado</p>
+                        @php
+                            $statusColors = [
+                                'available' => 'text-success',
+                                'loaned' => 'text-info',
+                                'maintenance' => 'text-warning',
+                                'lost' => 'text-error'
+                            ];
+                        @endphp
+                        <span class="text-sm font-black {{ $statusColors[$selectedItem->status] }} uppercase tracking-tighter">
+                            {{ $selectedItem->status }}
+                        </span>
                     </div>
-                    <div class="bg-base-200 p-4 rounded-2xl">
-                        <p class="text-[10px] uppercase font-bold text-base-content/40 tracking-widest mb-1">Ubicación</p>
-                        <span class="text-xs font-black text-base-content">{{ $selectedItem->location?->name ?: 'GENERAL' }}</span>
+                    <div class="bg-base-200/50 p-6 rounded-[2rem] border border-base-300/50">
+                        <p class="text-[10px] uppercase font-black text-base-content/30 tracking-widest mb-2">Ubicación</p>
+                        <span class="text-sm font-black text-base-content uppercase tracking-tighter">{{ $selectedItem->location?->name ?: 'ÁREA GENERAL' }}</span>
                     </div>
                 </div>
 
-                {{-- Detail Content --}}
-                <div class="space-y-6">
-                    <x-mary-card title="Especificaciones" shadow class="bg-base-200/50 border-none">
-                        <p class="text-sm leading-relaxed text-base-content/70">
-                            {{ $selectedItem->description ?: 'No hay especificaciones técnicas registradas para este activo.' }}
+                {{-- Description Section --}}
+                <div class="space-y-4">
+                    <x-mary-hr label="Ficha Técnica" class="opacity-50" />
+                    <div class="bg-base-100 border border-base-300 rounded-[2rem] p-8 shadow-sm">
+                        <p class="text-sm leading-relaxed text-base-content/70 italic">
+                            {{ $selectedItem->description ?: 'Sin especificaciones técnicas registradas para este activo.' }}
                         </p>
-                    </x-mary-card>
+                    </div>
+                </div>
 
-                    <div class="bg-base-100 border border-base-300 rounded-3xl p-6 flex items-center gap-4">
-                        <x-mary-icon name="o-calendar" class="w-8 h-8 text-base-content/20" />
+                {{-- Footer Info --}}
+                <div class="flex items-center justify-between p-6 bg-base-200/30 rounded-2xl border border-dashed border-base-300">
+                    <div class="flex items-center gap-3">
+                        <x-mary-icon name="o-calendar" class="w-5 h-5 text-base-content/30" />
                         <div>
-                            <p class="text-[10px] uppercase font-bold text-base-content/40 tracking-widest">Ingreso al Nodo</p>
-                            <p class="text-sm font-bold">{{ $selectedItem->created_at->format('d M, Y') }}</p>
+                            <p class="text-[9px] uppercase font-black text-base-content/30 tracking-widest">Fecha de Registro</p>
+                            <p class="text-xs font-bold">{{ $selectedItem->created_at->format('d/m/Y') }}</p>
                         </div>
                     </div>
+                    <x-mary-button icon="o-pencil" class="btn-ghost btn-sm rounded-xl" tooltip="Editar información" />
                 </div>
             </div>
         @endif
 
         <x-slot:actions>
-            <x-mary-button label="Cerrar" @click="$wire.showDrawer = false" class="btn-ghost rounded-xl" />
+            <div class="px-4 w-full">
+                <x-mary-button label="Cerrar Expediente" @click="$wire.showDrawer = false" class="btn-ghost rounded-2xl font-black text-xs uppercase tracking-widest w-full py-4" />
+            </div>
         </x-slot:actions>
     </x-mary-drawer>
 </div>
