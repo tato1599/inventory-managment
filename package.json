@@ -23,6 +23,7 @@
         "@fontsource/inter": "^5.2.8",
         "@fontsource/public-sans": "^5.2.7",
         "alpinejs": "^3.15.11",
+        "choices.js": "^11.2.2",
         "material-symbols": "^0.44.2"
     }
 }

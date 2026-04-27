@@ -12,6 +12,7 @@
 
 /* Icons */
 @import "material-symbols/outlined.css";
+@import "choices.js/public/assets/styles/choices.css";
 
 @tailwind base;
 @tailwind components;
@@ -31,4 +32,12 @@
     word-wrap: normal;
     white-space: nowrap;
     direction: ltr;
+}
+
+/* Choices.js Dark Mode Fixes */
+.choices__inner, .choices__list--dropdown, .choices__list--single {
+    @apply bg-base-100 border-base-300 text-base-content !important;
+}
+.choices__item--selectable.is-highlighted {
+    @apply bg-primary text-primary-content !important;
 }

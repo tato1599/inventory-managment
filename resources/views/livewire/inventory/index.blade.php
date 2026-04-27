@@ -12,26 +12,40 @@
     </x-mary-header>
 
     {{-- FILTERS BAR --}}
-    <div class="mb-10 flex flex-col md:flex-row gap-4 items-center">
+    <div class="mb-8 flex flex-col lg:flex-row gap-4 items-center bg-base-200/40 p-4 rounded-3xl border border-base-300/50">
         <div class="flex-1 w-full">
             <x-mary-input 
                 wire:model.live.debounce.300ms="search" 
-                placeholder="Filtrar por nombre, SKU o descripción..."
+                placeholder="Nombre, SKU o descripción..."
                 icon="o-magnifying-glass" 
-                class="bg-base-100 border-none shadow-sm rounded-2xl h-12" 
+                class="border-none shadow-sm rounded-2xl h-14" 
+                inline
                 clearable 
             />
         </div>
-        <div class="min-w-[200px] w-full md:w-auto">
-            <x-mary-select 
+        <div class="w-full lg:w-72">
+            <x-mary-choices 
                 wire:model.live="categoryId" 
                 :options="$this->categories" 
-                placeholder="Todas las categorías" 
+                placeholder="Categoría..." 
                 icon="o-tag" 
-                class="bg-base-100 border-none shadow-sm rounded-2xl h-12"
+                single
+                class="border-none shadow-sm rounded-2xl"
             />
         </div>
-        <x-mary-button icon="o-funnel" class="btn-ghost bg-base-100 shadow-sm rounded-2xl h-12" />
+        <div class="flex gap-2 shrink-0">
+            <x-mary-button 
+                icon="o-arrow-path" 
+                wire:click="clearFilters" 
+                class="btn-ghost bg-base-100 shadow-sm rounded-2xl h-14 w-14" 
+                tooltip="Limpiar filtros" 
+            />
+            <x-mary-button 
+                icon="o-funnel" 
+                class="btn-primary shadow-lg shadow-primary/20 rounded-2xl h-14 px-6 font-bold" 
+                label="Filtrar" 
+            />
+        </div>
     </div>
 
     {{-- TABLE CONTAINER --}}
@@ -57,13 +71,13 @@
 
             {{-- Name Cell --}}
             @scope('cell_name', $item)
-                <div class="flex items-center gap-3 py-1">
-                    <div class="w-10 h-10 bg-primary/5 rounded-xl flex items-center justify-center text-primary">
-                        <x-mary-icon name="o-cpu-chip" class="w-5 h-5" />
+                <div class="flex items-center gap-4 py-2">
+                    <div class="w-12 h-12 bg-primary/10 rounded-2xl flex items-center justify-center text-primary group-hover:scale-110 transition-transform duration-300">
+                        <x-mary-icon name="o-cpu-chip" class="w-6 h-6" />
                     </div>
                     <div>
-                        <p class="font-bold text-sm leading-tight">{{ $item->name }}</p>
-                        <p class="text-[10px] text-base-content/40 uppercase font-black tracking-tighter">{{ $item->category->name }}</p>
+                        <p class="font-bold text-sm leading-tight text-base-content group-hover:text-primary transition-colors">{{ $item->name }}</p>
+                        <p class="text-[10px] text-base-content/40 uppercase font-black tracking-widest mt-0.5">{{ $item->category->name }}</p>
                     </div>
                 </div>
             @endscope
@@ -92,9 +106,9 @@
                         'lost' => 'Extraviado'
                     ];
                 @endphp
-                <span class="badge {{ $colors[$item->status] }} badge-sm font-bold text-[10px] py-3 px-3 border-none bg-opacity-20 text-current">
+                <div class="badge {{ $colors[$item->status] }} badge-outline font-bold text-[10px] py-3 px-4 border-2">
                     {{ $labels[$item->status] }}
-                </span>
+                </div>
             @endscope
 
             {{-- Actions --}}
@@ -112,13 +126,18 @@
     </x-mary-card>
 
     @if (count($selectedIds) > 0)
-        <div class="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 animate-in slide-in-from-bottom-8 duration-500">
-            <div class="bg-neutral text-neutral-content px-8 py-4 rounded-3xl shadow-2xl flex items-center gap-6 border border-white/10 backdrop-blur-xl bg-opacity-90">
-                <p class="text-sm font-black tracking-tighter">{{ count($selectedIds) }} activos seleccionados</p>
-                <div class="h-6 w-px bg-white/20"></div>
-                <div class="flex items-center gap-2">
-                    <x-mary-button icon="o-printer" label="Etiquetas" class="btn-ghost btn-sm text-xs font-bold" />
-                    <x-mary-button icon="o-trash" label="Eliminar" class="btn-error btn-sm text-xs font-bold" wire:confirm="¿Eliminar seleccionados?" wire:click="deleteBatch" />
+        <div class="fixed bottom-10 left-1/2 -translate-x-1/2 z-50 animate-in slide-in-from-bottom-10 duration-500">
+            <div class="bg-gradient-to-r from-primary to-secondary text-white px-10 py-5 rounded-[2.5rem] shadow-2xl flex items-center gap-8 border-none backdrop-blur-2xl">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center">
+                        <span class="text-sm font-black">{{ count($selectedIds) }}</span>
+                    </div>
+                    <p class="text-xs uppercase font-black tracking-widest">Activos seleccionados</p>
+                </div>
+                <div class="h-8 w-px bg-white/20"></div>
+                <div class="flex items-center gap-3">
+                    <x-mary-button icon="o-printer" label="Imprimir" class="btn-ghost btn-sm text-xs font-bold bg-white/10 hover:bg-white/20 border-none rounded-2xl" />
+                    <x-mary-button icon="o-trash" label="Eliminar" class="btn-ghost btn-sm text-xs font-bold bg-error/20 hover:bg-error/40 border-none rounded-2xl text-white" wire:confirm="¿Eliminar seleccionados?" wire:click="deleteBatch" />
                 </div>
             </div>
         </div>
@@ -126,7 +145,7 @@
 
     {{-- Create Item Drawer --}}
     <x-mary-drawer wire:model="createDrawer" title="Nuevo Artículo" separator right class="w-11/12 lg:w-1/3 p-0">
-        <x-mary-form wire:submit="saveItem" class="p-6 space-y-6">
+        <div class="p-6 space-y-6">
             <div class="space-y-4">
                 <div class="bg-base-200 p-8 rounded-3xl text-center flex flex-col items-center">
                     <x-mary-icon name="o-rocket-launch" class="w-12 h-12 text-primary opacity-20 mb-2" />
@@ -137,19 +156,21 @@
                 <x-mary-input label="SKU / Identificador" wire:model="newItem.sku" icon="o-hashtag" placeholder="Ej. HW-IA-001" />
                 
                 <div class="grid grid-cols-2 gap-4">
-                    <x-mary-select 
+                    <x-mary-choices 
                         label="Categoría" 
                         wire:model="newItem.category_id" 
                         :options="$this->categories" 
                         icon="o-tag" 
                         placeholder="Seleccionar..." 
+                        single
                     />
-                    <x-mary-select 
+                    <x-mary-choices 
                         label="Ubicación / Área" 
                         wire:model="newItem.location_id" 
                         :options="$this->locations" 
                         icon="o-map-pin" 
                         placeholder="Seleccionar..." 
+                        single
                     />
                 </div>
 
@@ -166,12 +187,12 @@
 
                 <x-mary-textarea label="Descripción Técnica" wire:model="newItem.description" placeholder="Detalles de hardware, garantía, componentes..." rows="4" />
             </div>
+        </div>
 
-            <x-slot:actions>
-                <x-mary-button label="Cancelar" @click="$wire.createDrawer = false" class="btn-ghost rounded-xl" />
-                <x-mary-button label="Registrar Activo" icon="o-check" type="submit" class="btn-primary rounded-xl px-6" spinner="saveItem" />
-            </x-slot:actions>
-        </x-mary-form>
+        <x-slot:actions>
+            <x-mary-button label="Cancelar" @click="$wire.createDrawer = false" class="btn-ghost rounded-xl" />
+            <x-mary-button label="Registrar Activo" icon="o-check" wire:click="saveItem" class="btn-primary rounded-xl px-6" spinner="saveItem" />
+        </x-slot:actions>
     </x-mary-drawer>
 
     {{-- Details Drawer --}}

@@ -58,9 +58,14 @@ class Index extends Component
     {
         return Item::with(['category', 'location'])
             ->when($this->search, function (Builder $query) {
-                $query->where('name', 'like', "%{$this->search}%")
+                $query->where(function ($q) {
+                    $q->where('name', 'like', "%{$this->search}%")
                       ->orWhere('sku', 'like', "%{$this->search}%")
                       ->orWhere('description', 'like', "%{$this->search}%");
+                });
+            })
+            ->when($this->categoryId, function (Builder $query) {
+                $query->where('category_id', $this->categoryId);
             })
             ->orderBy($this->sortBy['column'], $this->sortBy['direction'])
             ->paginate($this->perPage);
@@ -122,6 +127,12 @@ class Index extends Component
         ]);
 
         $this->reset(['newItem', 'createDrawer']);
+        $this->resetPage();
+    }
+
+    public function clearFilters(): void
+    {
+        $this->reset(['search', 'categoryId']);
         $this->resetPage();
     }
 
